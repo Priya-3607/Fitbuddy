@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}All FitBuddy Users{% endblock %}
+{% block content %}
+<div class="page-top"><div><p class="eyebrow">ADMIN DASHBOARD</p><h1>Users & Plans</h1></div>
+<form action="/admin/logout" method="post"><button class="btn ghost">Logout</button></form></div>
+{% if not users %}
+<div class="card"><p>No users yet.</p></div>
+{% else %}
+<div class="admin-list">
+{% for user in users %}
+  <section class="card admin-user">
+    <div class="page-top">
+      <div><h2>{{ user.username }} <span class="muted">({{ user.user_id }})</span></h2>
+      <p>{{ user.age }} years · {{ user.weight }} kg · {{ user.goal }} · {{ user.intensity }} · {{ user.experience_level }}</p></div>
+      <form action="/admin/users/{{ user.user_id }}/delete" method="post" onsubmit="return confirm('Delete this user and all plans?')"><button class="btn danger">Delete</button></form>
+    </div>
+    {% for p in user.plans %}
+      <details>
+        <summary>Plan #{{ p.id }} · {{ p.created_at }} {% if p.updated_plan %}· Updated{% endif %}</summary>
+        <div class="admin-plan"><h4>Nutrition tip</h4><p>{{ p.nutrition_tip }}</p>
+        {% if p.feedback %}<h4>Feedback</h4><p>{{ p.feedback }}</p>{% endif %}
+        <h4>Original plan JSON</h4><pre>{{ p.original_plan }}</pre>
+        {% if p.updated_plan %}<h4>Updated plan JSON</h4><pre>{{ p.updated_plan }}</pre>{% endif %}</div>
+      </details>
+    {% endfor %}
+  </section>
+{% endfor %}
+</div>
+{% endif %}
+{% endblock %}

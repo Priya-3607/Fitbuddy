@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Your FitBuddy Plan{% endblock %}
+{% block content %}
+<div class="page-top">
+  <div><p class="eyebrow">PERSONALIZED PLAN</p><h1>{{ user.username }}'s 7-Day Plan</h1></div>
+  <a class="btn ghost" href="/">New Plan</a>
+</div>
+
+<div class="profile-strip">
+  <span><b>ID</b>{{ user.user_id }}</span><span><b>Age</b>{{ user.age }}</span><span><b>Weight</b>{{ user.weight }} kg</span>
+  <span><b>Goal</b>{{ user.goal }}</span><span><b>Intensity</b>{{ user.intensity }}</span><span><b>Level</b>{{ user.experience_level }}</span><span><b>Schedule</b>{{ user.workout_schedule }}</span>
+</div>
+
+{% if updated %}<div class="alert success">Your plan was updated using your feedback.</div>{% endif %}
+
+<section class="card">
+  <h2>{{ plan.title }}</h2>
+  <p class="lead">{{ plan.summary }}</p>
+  <div class="days">
+  {% for day in plan.days %}
+    <article class="day-card">
+      <div class="day-head"><div><span class="day-label">{{ day.day }}</span><h3>{{ day.focus }}</h3></div></div>
+      <p><strong>Warm-up:</strong> {{ day.warm_up }}</p>
+      <div class="exercise-list">
+      {% for ex in day.exercises %}
+        <div class="exercise">
+          <strong>{{ ex.name }}</strong>
+          <span>{{ ex.sets }} sets · {{ ex.reps_or_duration }} · Rest {{ ex.rest }}</span>
+          {% if ex.notes %}<small>{{ ex.notes }}</small>{% endif %}
+        </div>
+      {% endfor %}
+      </div>
+      <p><strong>Cooldown:</strong> {{ day.cool_down }}</p>
+      <p class="recovery"><strong>Recovery:</strong> {{ day.recovery_tip }}</p>
+    </article>
+  {% endfor %}
+  </div>
+</section>
+
+<section class="two-col">
+  <div class="card accent-card"><h2>🥗 Nutrition / Recovery Tip</h2><p>{{ nutrition_tip }}</p></div>
+  <div class="card"><h2>Need a change?</h2><p>Tell FitBuddy what you want changed—such as more cardio, more rest days, or easier exercises.</p><a class="btn primary" href="/feedback?user_id={{ user.user_id }}">Update with Feedback →</a></div>
+</section>
+
+<div class="alert"><strong>Safety:</strong> {{ plan.safety_note }}</div>
+{% endblock %}

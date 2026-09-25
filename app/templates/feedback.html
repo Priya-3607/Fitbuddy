@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Update Your Plan{% endblock %}
+{% block content %}
+<section class="center-card">
+  <p class="eyebrow">FEEDBACK LOOP</p>
+  <h1>Refine your workout plan</h1>
+  <p class="lead">Your feedback is sent to Gemini to create an updated 7-day plan.</p>
+  {% if error %}<div class="alert error">{{ error }}</div>{% endif %}
+  <form action="/submit-feedback" method="post">
+    <label>User ID<input name="user_id" required value="{{ user_id or '' }}" placeholder="The same ID used when generating your plan"></label>
+    <label>Your feedback<textarea name="feedback" rows="7" required maxlength="1000" placeholder="Example: Add more cardio, reduce leg exercises, and keep two rest days."></textarea></label>
+    <button class="btn primary" type="submit">Update My Plan →</button>
+  </form>
+</section>
+{% endblock %}
