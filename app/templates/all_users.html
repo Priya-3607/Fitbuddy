@@ -10,17 +10,72 @@
 {% for user in users %}
   <section class="card admin-user">
     <div class="page-top">
-      <div><h2>{{ user.username }} <span class="muted">({{ user.user_id }})</span></h2>
-      <p>{{ user.age }} years · {{ user.weight }} kg · {{ user.goal }} · {{ user.intensity }} · {{ user.experience_level }}</p></div>
+      <div>
+        <h2>{{ user.username }} <span class="muted">({{ user.user_id }})</span></h2>
+        <p>{{ user.age }} years · {{ user.weight }} kg · {{ user.goal }} · {{ user.intensity }} · {{ user.experience_level }} · {{ user.workout_schedule }}</p>
+      </div>
       <form action="/admin/users/{{ user.user_id }}/delete" method="post" onsubmit="return confirm('Delete this user and all plans?')"><button class="btn danger">Delete</button></form>
     </div>
     {% for p in user.plans %}
       <details>
         <summary>Plan #{{ p.id }} · {{ p.created_at }} {% if p.updated_plan %}· Updated{% endif %}</summary>
-        <div class="admin-plan"><h4>Nutrition tip</h4><p>{{ p.nutrition_tip }}</p>
-        {% if p.feedback %}<h4>Feedback</h4><p>{{ p.feedback }}</p>{% endif %}
-        <h4>Original plan JSON</h4><pre>{{ p.original_plan }}</pre>
-        {% if p.updated_plan %}<h4>Updated plan JSON</h4><pre>{{ p.updated_plan }}</pre>{% endif %}</div>
+        <div class="admin-plan">
+          {% set active_plan = p.parsed_updated if p.parsed_updated else p.parsed_original %}
+          
+          <div class="card accent-card" style="margin: 16px 0;">
+            <h4 style="margin: 0 0 6px 0; color: var(--accent);">🥗 Nutrition & Recovery Tip</h4>
+            <p style="margin: 0; line-height: 1.5;">{{ p.nutrition_tip }}</p>
+          </div>
+
+          {% if p.feedback %}
+            <div class="alert success" style="margin-bottom: 16px;">
+              <strong>User Feedback Received:</strong> {{ p.feedback }}
+            </div>
+          {% endif %}
+
+          {% if active_plan %}
+            <div style="margin-top: 16px;">
+              <h3 style="margin-bottom: 6px;">{{ active_plan.title }}</h3>
+              <p class="lead" style="font-size: 0.95rem; margin-top: 0;">{{ active_plan.summary }}</p>
+
+              <div class="days" style="margin-top: 16px;">
+              {% for day in active_plan.days %}
+                <article class="day-card">
+                  <div class="day-head"><div><span class="day-label">{{ day.day }}</span><h3>{{ day.focus }}</h3></div></div>
+                  <p><strong>Warm-up:</strong> {{ day.warm_up }}</p>
+                  <div class="exercise-list">
+                  {% for ex in day.exercises %}
+                    <div class="exercise">
+                      <strong>{{ ex.name }}</strong>
+                      <span>{{ ex.sets }} sets · {{ ex.reps_or_duration }} · Rest {{ ex.rest }}</span>
+                      {% if ex.notes %}<small>{{ ex.notes }}</small>{% endif %}
+                    </div>
+                  {% endfor %}
+                  </div>
+                  <p><strong>Cooldown:</strong> {{ day.cool_down }}</p>
+                  {% if day.recovery_tip %}<p class="recovery"><strong>Recovery:</strong> {{ day.recovery_tip }}</p>{% endif %}
+                </article>
+              {% endfor %}
+              </div>
+
+              {% if active_plan.safety_note %}
+                <div class="alert" style="margin-top: 16px;">
+                  <strong>Safety Note:</strong> {{ active_plan.safety_note }}
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          <details style="margin-top: 20px; border-top: 1px dashed var(--line); padding-top: 12px;">
+            <summary style="font-size: 0.85rem; color: var(--muted); cursor: pointer;">🔍 Raw JSON Data (Developer View)</summary>
+            <h4 style="margin-top: 12px;">Original Plan JSON</h4>
+            <pre>{{ p.original_plan }}</pre>
+            {% if p.updated_plan %}
+              <h4>Updated Plan JSON</h4>
+              <pre>{{ p.updated_plan }}</pre>
+            {% endif %}
+          </details>
+        </div>
       </details>
     {% endfor %}
   </section>
@@ -28,3 +83,4 @@
 </div>
 {% endif %}
 {% endblock %}
+

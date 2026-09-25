@@ -209,6 +209,20 @@ def view_all_users(request: Request, db: Session = Depends(get_db)):
     if not request.session.get("admin"):
         return RedirectResponse("/admin/login", status_code=303)
     users = db.query(User).order_by(User.created_at.desc()).all()
+    for u in users:
+        for p in u.plans:
+            try:
+                p.parsed_original = plan_from_json(p.original_plan)
+            except Exception:
+                p.parsed_original = None
+            if p.updated_plan:
+                try:
+                    p.parsed_updated = plan_from_json(p.updated_plan)
+                except Exception:
+                    p.parsed_updated = None
+            else:
+                p.parsed_updated = None
+
     return templates.TemplateResponse(
         request=request,
         name="all_users.html",
