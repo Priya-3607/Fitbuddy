@@ -142,3 +142,32 @@ def test_api_generate_and_feedback():
     assert fb_resp.status_code == 200
     fb_data = fb_resp.json()
     assert fb_data["user_id"] == "API001"
+
+def test_3day_schedule_generation():
+    response = client.post("/generate-workout", data={
+        "username": "Kabila",
+        "user_id": "FB105",
+        "age": 21,
+        "weight": 42,
+        "goal": "muscle gain",
+        "intensity": "medium",
+        "experience_level": "beginner",
+        "workout_schedule": "3 days/week",
+    })
+    assert response.status_code == 200
+    assert "3 Workout Days" in response.text or "3 days/week" in response.text
+    assert "Active Recovery &amp; Rest" in response.text or "Active Recovery & Rest" in response.text
+
+def test_demo_goal_customization():
+    from app.demo_data import demo_workout_plan
+    plan_3day = demo_workout_plan(goal="muscle gain", intensity="medium", workout_schedule="3 days/week")
+    assert len(plan_3day.days) == 7
+    active_days = [d for d in plan_3day.days if "Active Recovery" not in d.focus and "Rest" not in d.focus]
+    rest_days = [d for d in plan_3day.days if "Active Recovery" in d.focus or "Rest" in d.focus]
+    assert len(active_days) == 3
+    assert len(rest_days) == 4
+
+    plan_weight_loss = demo_workout_plan(goal="weight loss", intensity="high", workout_schedule="4 days/week")
+    active_days_wl = [d for d in plan_weight_loss.days if "Active Recovery" not in d.focus and "Rest" not in d.focus]
+    assert len(active_days_wl) == 4
+

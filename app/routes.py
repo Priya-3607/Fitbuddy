@@ -19,7 +19,7 @@ templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "tem
 
 def ai_generate(user: UserInput):
     if settings.demo_mode or not settings.google_api_key:
-        return demo_workout_plan(user.goal, user.intensity), (
+        return demo_workout_plan(user.goal, user.intensity, user.workout_schedule, user.experience_level), (
             "Demo tip: build balanced meals around protein, vegetables/fruit, whole grains "
             "and adequate hydration. Prioritize recovery and sleep."
         )
@@ -28,7 +28,7 @@ def ai_generate(user: UserInput):
     except Exception as exc:
         err_str = str(exc)
         if any(k in err_str for k in ["503", "UNAVAILABLE", "429", "404"]):
-            return demo_workout_plan(user.goal, user.intensity), (
+            return demo_workout_plan(user.goal, user.intensity, user.workout_schedule, user.experience_level), (
                 "Nutrition tip: build balanced meals around protein, vegetables/fruit, whole grains "
                 "and adequate hydration. Prioritize recovery and sleep. (Generated via resilient fallback)."
             )
@@ -138,14 +138,14 @@ def submit_feedback(
 
     try:
         if settings.demo_mode or not settings.google_api_key:
-            updated = demo_workout_plan(user.goal, user.intensity)
+            updated = demo_workout_plan(user.goal, user.intensity, user.workout_schedule, user.experience_level)
         else:
             try:
                 updated = update_workout_plan(source_json, feedback)
             except Exception as exc:
                 err_str = str(exc)
                 if any(k in err_str for k in ["503", "UNAVAILABLE", "429", "404"]):
-                    updated = demo_workout_plan(user.goal, user.intensity)
+                    updated = demo_workout_plan(user.goal, user.intensity, user.workout_schedule, user.experience_level)
                 else:
                     raise exc
         plan.updated_plan = plan_to_json(updated)
@@ -263,7 +263,7 @@ def api_feedback(payload: FeedbackRequest, db: Session = Depends(get_db)):
     source_json = plan.updated_plan or plan.original_plan
     try:
         if settings.demo_mode or not settings.google_api_key:
-            updated = demo_workout_plan(user.goal, user.intensity)
+            updated = demo_workout_plan(user.goal, user.intensity, user.workout_schedule, user.experience_level)
         else:
             updated = update_workout_plan(source_json, payload.feedback)
     except Exception as exc:
